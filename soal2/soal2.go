@@ -6,51 +6,72 @@ import (
 	"strings"
 )
 
-func sortLetters(data []string) string {
-	letterCounts := make(map[rune]int)
-
-	for _, word := range data {
-		for _, char := range word {
-			letterCounts[char]++
+func printInput(strs []string) {
+	fmt.Print("Input:[")
+	for i, str := range strs {
+		fmt.Printf(`"%s"`, str)
+		if i < len(strs)-1 {
+			fmt.Print(", ")
 		}
 	}
-
-	var pairs []Pair
-	for char, count := range letterCounts {
-		pairs = append(pairs, Pair{char, count})
-	}
-
-	sort.Slice(pairs, func(i, j int) bool {
-		if pairs[i].Count != pairs[j].Count {
-			return pairs[i].Count > pairs[j].Count
-		}
-		return pairs[i].Char < pairs[j].Char
-	})
-
-	var result strings.Builder
-	for _, pair := range pairs {
-		for i := 0; i < pair.Count; i++ {
-			result.WriteRune(pair.Char)
-		}
-	}
-
-	return result.String()
+	fmt.Println("]")
 }
 
-type Pair struct {
-	Char  rune
-	Count int
+func charOrganizer(strs []string) {
+	printInput(strs)
+
+	str := strings.Join(strs, "")
+	charMap := make(map[rune]int)
+	for _, char := range str {
+		charMap[char]++
+	}
+
+	var keys []rune
+	values := make(map[int]int)
+	for key, value := range charMap {
+		keys = append(keys, key)
+		values[value]++
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return charMap[keys[i]] > charMap[keys[j]]
+	})
+
+	var asciiSortStr []string
+	fmt.Println("Output:")
+	flag := 1
+	for _, char := range keys {
+		flag = values[charMap[char]]
+		if flag == 1 {
+			if len(asciiSortStr) != 0 {
+				asciiSortStr = append(asciiSortStr, string(char))
+				sort.SliceStable(asciiSortStr, func(i, j int) bool {
+					return asciiSortStr[i] < asciiSortStr[j]
+				})
+				newStr := strings.Join(asciiSortStr, "")
+
+				fmt.Print(newStr)
+				asciiSortStr = nil
+			} else {
+				fmt.Print(string(char))
+			}
+		} else {
+			asciiSortStr = append(asciiSortStr, string(char))
+			values[charMap[char]]--
+		}
+	}
+	fmt.Println()
 }
 
 func main() {
-	data1 := []string{"Abc", "bCd"}
-	data2 := []string{"Oke", "One"}
-	data3 := []string{"Pendanaan", "Terproteksi", "Untuk", "Dampak", "Berarti"}
+	var strs []string
 
-	fmt.Println("Input:", data1)
-	fmt.Println("Output:", sortLetters(data1))
-	fmt.Println("Input:", data2)
-	fmt.Println("Output:", sortLetters(data2))
-	fmt.Println("Input:", data3)
-	fmt.Println("Output:", sortLetters(data3))
+	strs = []string{"Abc", "bCd"}
+	charOrganizer(strs)
+
+	strs = []string{"One", "Oke"}
+	charOrganizer(strs)
+
+	strs = []string{"Pendanaan", "Terproteksi", "Untuk", "Dampak", "Berarti"}
+	charOrganizer(strs)
 }
